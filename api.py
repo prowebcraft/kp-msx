@@ -138,7 +138,7 @@ async def category(request: Request):
     genre = request.query_params.get('genre')
     sort = request.query_params.get('sort')
     result = await request.state.device.kp.get_content(category=cat, page=page, extra=extra, genre=genre, sort=sort)
-    result = msx.content(result, cat, page, extra=(extra or genre), small_posters=request.state.device.settings.small_posters)
+    result = msx.content(result, cat, page, extra=(extra or genre), device_settings=request.state.device.settings)
     return result
 
 
@@ -168,7 +168,7 @@ async def tv(request: Request):
 
     result = msx.tv_channels(
         result,
-        alternative_player=request.state.device.settings.alternative_player
+        device_settings=request.state.device.settings
     )
     return result
 
@@ -178,7 +178,7 @@ async def folder(request: Request):
     page = int(request.query_params.get('page'))
     f = request.query_params.get('folder')
     result = await request.state.device.kp.get_bookmark_folder(f, page=page)
-    result = msx.content(result, "folder", page, extra="wtf", small_posters=request.state.device.settings.small_posters)
+    result = msx.content(result, "folder", page, extra="wtf", device_settings=request.state.device.settings)
     return result
 
 
@@ -186,9 +186,7 @@ async def folder(request: Request):
 async def content(request: Request):
     result = await request.state.device.kp.get_single_content(request.query_params.get('content_id'))
     return result.to_msx_panel(
-        proxy=request.state.device.settings.proxy,
-        alternative_player=request.state.device.settings.alternative_player,
-        small_poster=request.state.device.settings.small_posters
+        device_settings=request.state.device.settings
     )
 
 
@@ -196,8 +194,7 @@ async def content(request: Request):
 async def content_multivideo(request: Request):
     result = await request.state.device.kp.get_single_content(request.query_params.get('content_id'))
     return result.to_multivideo_msx_panel(
-        proxy=request.state.device.settings.proxy,
-        alternative_player=request.state.device.settings.alternative_player
+        device_settings=request.state.device.settings
     )
 
 
@@ -229,15 +226,15 @@ async def episodes(request: Request):
     result = await request.state.device.kp.get_single_content(request.query_params.get('content_id'))
     return result.to_episodes_msx_panel(
         int(request.query_params.get('season')),
-        proxy=request.state.device.settings.proxy,
-        alternative_player=request.state.device.settings.alternative_player
+        device_settings=request.state.device.settings
     )
 
 
 @app.get(ENDPOINT + '/search')
 async def search(request: Request):
     result = await request.state.device.kp.search(request.query_params.get('q'))
-    result = msx.content(result, "search", 1, extra=request.query_params.get('q'), decompress=False, small_posters=request.state.device.settings.small_posters)
+    result = msx.content(result, "search", 1, extra=request.query_params.get('q'), decompress=False,
+                         device_settings=request.state.device.settings)
     return result
 
 
@@ -245,14 +242,14 @@ async def search(request: Request):
 async def history(request: Request):
     page = int(request.query_params.get('page'))
     result = await request.state.device.kp.get_history(page=page)
-    result = msx.content(result, "history", page, extra="wtf", small_posters=request.state.device.settings.small_posters)
+    result = msx.content(result, "history", page, extra="wtf", device_settings=request.state.device.settings)
     return result
 
 
 @app.get(ENDPOINT + '/watching')
 async def watching(request: Request):
     result = await request.state.device.kp.get_watching(subscribed=1)
-    result = msx.content(result, "watching", 0, extra='wtf', small_posters=request.state.device.settings.small_posters)
+    result = msx.content(result, "watching", 0, extra='wtf', device_settings=request.state.device.settings)
     return result
 
 
@@ -260,7 +257,7 @@ async def watching(request: Request):
 async def collections(request: Request):
     page = request.query_params.get('page')
     result = await request.state.device.kp.get_collections(page=page)
-    result = msx.collections(result, small_posters=request.state.device.settings.small_posters)
+    result = msx.collections(result, device_settings=request.state.device.settings)
     return result
 
 
@@ -268,7 +265,7 @@ async def collections(request: Request):
 async def single_collection(request: Request):
     collection_id = request.query_params.get('collection_id')
     result = await request.state.device.kp.get_single_collection(collection_id)
-    result = msx.content(result, "collection", 0, extra='wtf', small_posters=request.state.device.settings.small_posters)
+    result = msx.content(result, "collection", 0, extra='wtf', device_settings=request.state.device.settings)
     return result
 
 

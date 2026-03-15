@@ -168,7 +168,7 @@ def restart():
     }
 
 
-def content(entries, category, page, extra=None, decompress=None, small_posters: bool = False):
+def content(entries, category, page, extra=None, decompress=None, device_settings: 'DeviceSettings' = None):
     resp = {
         "type": "list",
         "template": {
@@ -189,12 +189,12 @@ def content(entries, category, page, extra=None, decompress=None, small_posters:
             "items": [i.to_msx(category) for i in CategoryExtra.static_extras()]
         }
     for entry in entries:
-        resp['items'].append(entry.to_msx(small_poster=small_posters))
+        resp['items'].append(entry.to_msx(device_settings=device_settings))
 
     return resp
 
 
-def collections(entries, small_posters: bool = False):
+def collections(entries, device_settings: 'DeviceSettings' = None) -> dict:
     resp = {
         "type": "list",
         "template": {
@@ -207,7 +207,7 @@ def collections(entries, small_posters: bool = False):
     }
 
     for entry in entries:
-        resp['items'].append(entry.to_msx(small_poster=small_posters))
+        resp['items'].append(entry.to_msx(device_settings=device_settings))
 
     return resp
 
@@ -259,7 +259,7 @@ def empty_response():
     }
 
 
-def tv_channels(channels, alternative_player: bool = False):
+def tv_channels(channels, device_settings: 'DeviceSettings' = None):
     resp = {
         "type": "list",
         'header': {
@@ -287,7 +287,7 @@ def tv_channels(channels, alternative_player: bool = False):
                 'progress:display': 'false'
             }
         },
-        "items": [channel.to_msx(alternative_player=alternative_player) for channel in channels]
+        "items": [channel.to_msx(device_settings=device_settings) for channel in channels]
     }
 
     return resp
@@ -520,9 +520,9 @@ def menu_entries_settings_panel(categories: 'List[Category]'):
             "items": [i.to_msx_settings_button() for i in categories if not i.ignored]
         }
 
-def play_action(video_url, proxy: bool = False, alternative_player: bool = False):
-    url = make_proxy_url(video_url) if proxy else video_url
-    player = config.ALTERNATIVE_PLAYER if alternative_player else config.PLAYER
+def play_action(video_url, device_settings: 'DeviceSettings' = None):
+    url = make_proxy_url(video_url) if device_settings is not None and device_settings.proxy else video_url
+    player = config.ALTERNATIVE_PLAYER if device_settings is not None and device_settings.alternative_player else config.PLAYER
 
     if config.TIZEN:
         return f'video:{url}'

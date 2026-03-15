@@ -29,13 +29,13 @@ class Playable:
             return video_files['url'][config.PROTOCOL]
         return None
 
-    def msx_action(self, proxy: bool = False, alternative_player: bool = False):
+    def msx_action(self, device_settings: 'DeviceSettings' = None):
         if not self.video_url:
             return "warn:Почему-то нет видео"
 
-        return msx.play_action(self.video_url, proxy=proxy, alternative_player=alternative_player)
+        return msx.play_action(self.video_url, device_settings=device_settings)
 
-    def msx_properties(self, proxy: bool = False, alternative_player: bool = False):
+    def msx_properties(self, device_settings: 'DeviceSettings' = None):
         props = {
             'resume:key': self.resume_key(),
             'trigger:ready': self.trigger_ready()
@@ -43,8 +43,8 @@ class Playable:
 
         props.update(msx.DEFAULT_PLAY_BUTTON_PROPS)
 
-        if alternative_player:
+        if device_settings is not None and device_settings.alternative_player:
             for track in self.subtitles:
-                props.update({f'html5x:subtitle:{track.lang}:{track.lang.upper()}': track.url if not proxy else make_proxy_url(track.url)})
+                props.update({f'html5x:subtitle:{track.lang}:{track.lang.upper()}': track.url if not device_settings.proxy else make_proxy_url(track.url)})
 
         return props

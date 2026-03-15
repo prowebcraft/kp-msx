@@ -17,11 +17,11 @@ class Video(Playable):
 
         self.title = data.get('title')
 
-    def to_multivideo_entry(self, proxy: bool = False, alternative_player: bool = False):
+    def to_multivideo_entry(self, device_settings: 'DeviceSettings'=None) -> 'SubtitleTrack':
         entry = {
             "label": self.title,
-            'action': self.msx_action(proxy=proxy, alternative_player=alternative_player),
-            'properties': self.msx_properties(proxy=proxy, alternative_player=alternative_player)
+            'action': self.msx_action(device_settings=device_settings),
+            'properties': self.msx_properties(device_settings=device_settings),
         }
         return entry
 

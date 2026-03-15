@@ -1,3 +1,4 @@
+from models.DeviceSettings import DeviceSettings
 from models.Folder import Folder
 from models.Season import Season
 from models.Video import Video
@@ -54,10 +55,10 @@ class Content:
     def update_bookmarks(self, folders):
         self.bookmarks = [i.id for i in folders]
 
-    def to_msx(self, small_poster: bool = False):
+    def to_msx(self, device_settings: 'DeviceSettings' = None):
         entry = {
             'title': self.title,
-            'image': self.small_poster if small_poster else self.poster,
+            'image': self.poster,
             "action": msx.format_action('/msx/content', params={'content_id': self.id}, module='panel')
         }
         if self.media is not None and self.media.season > 0:
@@ -76,10 +77,10 @@ class Content:
             entry['titleFooter'] = entry['titleFooter'].strip()
         return entry
 
-    def msx_action(self, proxy: bool = False, alternative_player: bool = False):
+    def msx_action(self, device_settings: 'DeviceSettings' = None):
         if self.videos is not None:
             if len(self.videos) == 1:
-                return self.videos[0].msx_action(proxy=proxy, alternative_player=alternative_player)
+                return self.videos[0].msx_action(device_settings=device_settings)
             else:
                 return msx.format_action('/msx/multivideo', params={'content_id': self.id}, module='panel')
         if self.seasons is not None:
@@ -122,7 +123,7 @@ class Content:
         return button
 
 
-    def to_trailer_button(self, qty, proxy: bool = False, alternative_player: bool = False):
+    def to_trailer_button(self, qty, device_settings: 'DeviceSettings' = None):
         props = {
             'trigger:background': 'player:button:eject:execute'
         }
@@ -136,15 +137,12 @@ class Content:
             "label": '{ico:msx-white:movie}',
             "playerLabel": f'Трейлер {self.title}',
             'properties': props,
-            'action': msx.play_action(self.trailer, proxy=proxy, alternative_player=alternative_player),
+            'action': msx.play_action(self.trailer, device_settings=device_settings),
         }
 
         return button
 
-    def to_msx_panel(self,
-                     proxy: bool = False,
-                     alternative_player: bool = False,
-                     small_poster: bool = False):
+    def to_msx_panel(self, device_settings: 'DeviceSettings' = None):
 
         buttons = [self.to_bookmark_button()]
 
@@ -152,7 +150,7 @@ class Content:
             buttons.append(self.to_subscription_button())
 
         if self.trailer:
-            buttons.append(self.to_trailer_button(len(buttons), proxy=proxy, alternative_player=alternative_player))
+            buttons.append(self.to_trailer_button(len(buttons), device_settings=device_settings))
 
         watch_button = {
             "id": self.WATCH_BUTTON_ID,
@@ -161,11 +159,11 @@ class Content:
             "label": "Смотреть" if len(buttons) <= 2 else "{ico:msx-white:play-circle-outline}",
             "playerLabel": self.title,
             'focus': True,
-            'action': self.msx_action(proxy=proxy, alternative_player=alternative_player),
+            'action': self.msx_action(device_settings=device_settings),
         }
 
         if self.videos is not None and len(self.videos) == 1:
-            watch_button['properties'] = self.videos[0].msx_properties(proxy=proxy, alternative_player=alternative_player)
+            watch_button['properties'] = self.videos[0].msx_properties(device_settings=device_settings)
 
         buttons = [watch_button] + buttons
 
@@ -191,7 +189,7 @@ class Content:
                             'id': 'teaser',
                             "type": "teaser",
                             "layout": "0,0,4,6",
-                            "image": self.small_poster if small_poster else self.poster,
+                            "image": self.poster,
                             "imageFiller": "height-left",
                             'action': 'focus:plot',
                             'stamp': stamp
@@ -240,7 +238,7 @@ class Content:
             })
         return entry
 
-    def to_multivideo_msx_panel(self, proxy: bool = False, alternative_player: bool = False):
+    def to_multivideo_msx_panel(self, device_settings: 'DeviceSettings' = None):
         entry = {
             "type": "list",
             "headline": self.title,
@@ -251,11 +249,11 @@ class Content:
                 'stampColor': 'msx-glass',
                 'playerLabel': self.title,
             },
-            "items": [i.to_multivideo_entry(proxy=proxy, alternative_player=alternative_player) for i in self.videos]
+            "items": [i.to_multivideo_entry(device_settings=device_settings) for i in self.videos]
         }
         return entry
 
-    def to_episodes_msx_panel(self, season_number, proxy: bool = False, alternative_player: bool = False):
+    def to_episodes_msx_panel(self, season_number, device_settings: 'DeviceSettings' = None) -> dict:
         for season in self.seasons:
             if season.n == season_number:
                 break
@@ -267,7 +265,7 @@ class Content:
                 "layout": f"0,0,8,1",
                 'stampColor': 'msx-glass',
             },
-            "items": season.to_episode_pages(proxy=proxy, alternative_player=alternative_player)
+            "items": season.to_episode_pages(device_settings=device_settings)
         }
         return entry
 

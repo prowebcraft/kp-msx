@@ -13,16 +13,16 @@ class Season:
 
         self.watched = self._watched()
 
-    def to_episode_pages(self, proxy: bool = False, alternative_player: bool = False):
+    def to_episode_pages(self, device_settings: 'DeviceSettings' = None):
         items = []
         for i, episode in enumerate(self.episodes):
             entry = {
                 "label": episode.menu_title(),
                 "playerLabel": episode.player_title(),
-                'action': episode.msx_action(proxy=proxy, alternative_player=alternative_player),
+                'action': episode.msx_action(device_settings=device_settings),
                 'stamp': '{ico:check}' if episode.watched else None,
                 'focus': not episode.watched,
-                'properties': episode.msx_properties(proxy=proxy, alternative_player=alternative_player)
+                'properties': episode.msx_properties(device_settings=device_settings),
             }
             items.append(entry)
         return items
