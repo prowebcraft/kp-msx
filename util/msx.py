@@ -448,7 +448,7 @@ MIXED_PLAYLIST_ID = 'mixed_playlist'
 SERVER_ID = 'server'
 PROXY_ID = 'proxy'
 ALTERNATIVE_PLAYER_ID = 'alternative_player'
-SMALL_POSTERS_ID = 'small_posters'
+POSTERS_ID = 'posters'
 MENU_ID = 'menu'
 HELP_ID = 'help'
 
@@ -469,7 +469,7 @@ def settings_menu(device_settings: 'DeviceSettings'):
             device_settings.to_server_msx_button(),
             device_settings.to_proxy_msx_button(),
             device_settings.to_alternative_player_msx_button(),
-            device_settings.to_small_posters_msx_button(),
+            device_settings.to_posters_msx_button(),
             device_settings.to_menu_msx_button(),
             device_settings.to_help_msx_button(),
             {
@@ -518,6 +518,25 @@ def menu_entries_settings_panel(categories: 'List[Category]'):
                 'stampColor': 'msx-glass',
             },
             "items": [i.to_msx_settings_button() for i in categories if not i.ignored]
+        }
+
+def poster_settings_panel(poster: 'Poster'):
+    return {
+            "type": "list",
+            "headline": 'Выберите первый рабочий постер',
+            'template': {
+                'enumerate': False,
+                "type": "separate",
+                "layout": f"0,0,2,4",
+                'stampColor': 'msx-glass',
+            },
+            "items": [
+                {
+                    'title': f'{size} / {proxy['title']}',
+                    'image': poster.format(size, proxy),
+                    "action": format_action(f'/msx/settings/poster/set/{size}/{proxy['id']}', module='execute')
+                } for size in poster.SIZES for proxy in poster.PROXIES
+            ]
         }
 
 def play_action(video_url, device_settings: 'DeviceSettings' = None):

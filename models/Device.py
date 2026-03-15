@@ -84,10 +84,6 @@ class Device:
         self.settings.alternative_player = not self.settings.alternative_player
         self.update_settings()
 
-    async def toggle_small_posters(self):
-        self.settings.small_posters = not self.settings.small_posters
-        self.update_settings()
-
     async def toggle_server(self) -> str:
         device_info = await self.kp.get_current_device_info()
         available_servers = await self.kp.get_available_servers()
@@ -111,6 +107,11 @@ class Device:
             self.settings.menu_blacklist.append(menu_entry)
         self.update_settings()
         return not menu_entry in self.settings.menu_blacklist
+
+    def set_poster_settings(self, poster_size, poster_proxy):
+        self.settings.poster_size = poster_size
+        self.settings.poster_proxy = poster_proxy
+        self.update_settings()
 
     def reset_menu(self):
         self.settings.menu_blacklist = []

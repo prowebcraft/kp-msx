@@ -338,6 +338,12 @@ async def menu_entries(request: Request):
     entry = msx.menu_entries_settings_panel(categories)
     return entry
 
+@app.get(ENDPOINT + '/settings/posters')
+async def settings_posters(request: Request):
+    result = await request.state.device.kp.get_single_content('13097')
+    entry = msx.poster_settings_panel(result.poster)
+    return entry
+
 @app.post(ENDPOINT + '/settings/toggle/{setting}')
 async def settings_toggle_proxy(request: Request, setting: str):
     match setting:
@@ -362,9 +368,6 @@ async def settings_toggle_proxy(request: Request, setting: str):
         case msx.ALTERNATIVE_PLAYER_ID:
             await request.state.device.toggle_alternative_player()
             return msx.update_panel(msx.ALTERNATIVE_PLAYER_ID, msx.stamp(request.state.device.settings.alternative_player))
-        case msx.SMALL_POSTERS_ID:
-            await request.state.device.toggle_small_posters()
-            return msx.update_panel(msx.SMALL_POSTERS_ID, msx.stamp(request.state.device.settings.small_posters))
         case _:
             return msx.empty_response()
 
@@ -373,6 +376,13 @@ async def settings_toggle_proxy(request: Request, setting: str):
 async def toggle_menu_entry(request: Request, menu_entry :str):
     current_state = request.state.device.toggle_menu_entry(menu_entry)
     update = msx.update_panel(menu_entry, msx.stamp(current_state))
+    return update
+
+
+@app.post(ENDPOINT + '/settings/poster/set/{poster_size}/{poster_proxy}')
+async def set_poster_settings(request: Request, poster_size :str, poster_proxy: str):
+    request.state.device.set_poster_settings(poster_size, poster_proxy)
+    update = msx.restart()
     return update
 
 

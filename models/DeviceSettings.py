@@ -15,7 +15,8 @@ class DeviceSettings:
         self.hevc = data.get('hevc', False)
         self.hdr = data.get('hdr', False)
         self.mixed_playlist = data.get('mixed_playlist', False)
-        self.small_posters = data.get('small_posters', False)
+        self.poster_size = data.get('poster_size', 'large')
+        self.poster_proxy = data.get('poster_proxy', None)
         self.server = data.get('server', msx.LENNY)
 
     def to_dict(self):
@@ -27,7 +28,8 @@ class DeviceSettings:
             'hevc': self.hevc,
             'hdr': self.hdr,
             'mixed_playlist': self.mixed_playlist,
-            'small_posters': self.small_posters,
+            'poster_size': self.poster_size,
+            'poster_proxy': self.poster_proxy,
             'server': self.server
         }
 
@@ -93,13 +95,12 @@ class DeviceSettings:
         entry.update(msx.stamp(self.alternative_player))
         return entry
 
-    def to_small_posters_msx_button(self):
+    def to_posters_msx_button(self):
         entry = msx.settings_button(
-            msx.SMALL_POSTERS_ID, 'Ремонт постеров',
-            msx.format_action(f'/msx/settings/toggle/{msx.SMALL_POSTERS_ID}', module='execute'),
-            "Включите, если постеры не загружаются. Требуется перезапуск приложения."
+            msx.POSTERS_ID, 'Ремонт постеров',
+            msx.format_action(f'/msx/settings/posters', module='panel'),
+            "Настройки загрузки постеров. Требуется перезапуск приложения."
         )
-        entry.update(msx.stamp(self.small_posters))
         return entry
 
     def to_menu_msx_button(self):

@@ -14,4 +14,3 @@ KP_CLIENT_SECRET = os.environ.get('KP_CLIENT_SECRET') or 'cgg3gtifu46urtfp2zp1nq
 QUALITY = os.environ.get('QUALITY')
 PROTOCOL = os.environ.get('PROTOCOL') or 'hls4'
 TIZEN = os.environ.get('TIZEN') == 'yes'
-POSTERS_HOST_REPLACEMENT = os.environ.get('POSTERS_HOST_REPLACEMENT') or None

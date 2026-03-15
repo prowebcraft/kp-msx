@@ -1,8 +1,9 @@
 from models.DeviceSettings import DeviceSettings
 from models.Folder import Folder
+from models.Poster import Poster
 from models.Season import Season
 from models.Video import Video
-from util import msx, hacks
+from util import msx
 
 
 class Content:
@@ -25,8 +26,7 @@ class Content:
         if self.cast:
             self.plot += f'\n\nВ ролях: {self.cast}'
 
-        self.poster = (data.get('posters') or {}).get('big')
-        self.small_poster = hacks.posters_fix((data.get('posters') or {}).get('small'))
+        self.poster = Poster((data.get('posters') or {}))
 
         self.rating = data.get('imdb_rating') or data.get('kinopoisk_rating')
         self.is_4k = data.get('quality') == 2160
@@ -45,7 +45,6 @@ class Content:
         self.seasons = None
 
         if (seasons := data.get('seasons')) is not None:
-            self.poster = (data.get('posters') or {}).get('big')
             self.seasons = [Season(i, self.id) for i in seasons]
 
         self.new_episodes = data.get('new')
@@ -58,7 +57,7 @@ class Content:
     def to_msx(self, device_settings: 'DeviceSettings' = None):
         entry = {
             'title': self.title,
-            'image': self.poster,
+            'image': self.poster.get(device_settings=device_settings),
             "action": msx.format_action('/msx/content', params={'content_id': self.id}, module='panel')
         }
         if self.media is not None and self.media.season > 0:
@@ -189,7 +188,7 @@ class Content:
                             'id': 'teaser',
                             "type": "teaser",
                             "layout": "0,0,4,6",
-                            "image": self.poster,
+                            "image": self.poster.get(device_settings=device_settings),
                             "imageFiller": "height-left",
                             'action': 'focus:plot',
                             'stamp': stamp
