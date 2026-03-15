@@ -534,7 +534,7 @@ def poster_settings_panel(poster: 'Poster'):
                 {
                     'title': f"{size} / {proxy['title']}",
                     'image': poster.format(size, proxy),
-                    "action": format_action(f'/msx/settings/poster/set/{size}/{proxy['id']}', module='execute')
+                    "action": format_action(f"/msx/settings/poster/set/{size}/{proxy['id']}", module='execute')
                 } for size in poster.SIZES for proxy in poster.PROXIES
             ]
         }
