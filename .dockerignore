@@ -1,0 +1,12 @@
+venv/
+.git/
+.gitignore
+.idea/
+__pycache__/
+*.pyc
+*.db
+.github/
+*.md
+.env
+.env.*
+!.env.example
