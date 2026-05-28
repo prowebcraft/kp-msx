@@ -7,6 +7,7 @@ class Category:
     BLACKLIST = ['4k']
 
     STATIC_CATEGORIES = [
+        lambda: {'id': 'continue', 'title': 'Продолжить просмотр', 'icon': 'play-circle-outline', 'path': '/msx/continue'},
         lambda: {'id': 'new', 'title': 'Новинки', 'path': '/msx/category', 'params': {'sort': 'created-', 'page': '{PAGE}'}, 'interaction': f'{config.MSX_HOST}/paging.html'},
         lambda: {'id': 'toons', 'title': 'Мультфильмы', 'path': '/msx/category', 'params': {'genre': '23', 'page': '{PAGE}'}, 'interaction': f'{config.MSX_HOST}/paging.html'},
         lambda: {'id': 'anime', 'title': 'Аниме', 'path': '/msx/category', 'params': {'genre': '25', 'page': '{PAGE}'}, 'interaction': f'{config.MSX_HOST}/paging.html'},

@@ -1,3 +1,5 @@
+import asyncio
+
 import aiohttp
 
 import config
@@ -112,6 +114,74 @@ class KinoPub:
         if result is None:
             return None
         return [Content(i['item'], Media(i['media'])) for i in result['history']]
+
+    async def get_continue_watching(self, limit=10, history_pages=3):
+        seen = set()
+        candidates = []
+        for page in range(1, history_pages + 1):
+            page_items = await self.get_history(page=page)
+            if not page_items:
+                break
+            for entry in page_items:
+                if entry.id in seen:
+                    continue
+                seen.add(entry.id)
+                candidates.append(entry)
+
+        if not candidates:
+            return []
+
+        resolved = await asyncio.gather(*(self._resolve_continue(c) for c in candidates))
+        return [r for r in resolved if r is not None][:limit]
+
+    async def _resolve_continue(self, history_content):
+        media = history_content.media
+        full = await self.get_single_content(history_content.id)
+        if full is None:
+            return None
+
+        if full.seasons:
+            if media is None or not media.season:
+                return None
+            target_season = next((s for s in full.seasons if s.n == media.season), None)
+            if target_season is None:
+                return None
+            target_ep = next((e for e in target_season.episodes if e.n == media.n), None)
+            if target_ep is None:
+                return None
+            if target_ep.watched:
+                episode = self._find_next_episode(full, media.season, media.n)
+                if episode is None:
+                    return None
+            else:
+                episode = target_ep
+            if not episode.video_url:
+                return None
+            return {'content': full, 'episode': episode, 'video': None}
+
+        if full.videos:
+            if full.watched:
+                return None
+            if len(full.videos) != 1:
+                return None
+            video = full.videos[0]
+            if not video.video_url:
+                return None
+            return {'content': full, 'episode': None, 'video': video}
+
+        return None
+
+    @staticmethod
+    def _find_next_episode(content, season_n, episode_n):
+        for season in sorted(content.seasons, key=lambda s: s.n):
+            if season.n < season_n:
+                continue
+            for episode in sorted(season.episodes, key=lambda e: e.n):
+                if season.n == season_n and episode.n <= episode_n:
+                    continue
+                if not episode.watched:
+                    return episode
+        return None
 
     async def get_watching(self, subscribed=0):
         result = await self.api(f'/watching/serials', {'subscribed': subscribed})

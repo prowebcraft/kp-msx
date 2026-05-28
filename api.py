@@ -103,7 +103,13 @@ async def menu(request: Request):
     if categories is None:
         request.state.device.delete()
         return msx.unregistered_menu()
-    categories += Category.static_categories()
+    static = Category.static_categories()
+    continue_cat = next((c for c in static if c.id == 'continue'), None)
+    rest = [c for c in static if c.id != 'continue']
+    if continue_cat is not None:
+        categories = [continue_cat] + categories + rest
+    else:
+        categories += rest
     for category in categories:
         if category.id in request.state.device.settings.menu_blacklist:
             category.blacklisted = True
@@ -244,6 +250,13 @@ async def history(request: Request):
     result = await request.state.device.kp.get_history(page=page)
     result = msx.content(result, "history", page, extra="wtf", device_settings=request.state.device.settings)
     return result
+
+
+@app.get(ENDPOINT + '/continue')
+async def continue_watching(request: Request):
+    device = request.state.device
+    items = await device.kp.get_continue_watching(limit=10)
+    return msx.continue_watching(items, device_settings=device.settings)
 
 
 @app.get(ENDPOINT + '/watching')

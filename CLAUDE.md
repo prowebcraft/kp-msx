@@ -19,6 +19,17 @@ MONGODB_URL="..." MSX_HOST="..." python api.py
 
 Проверка: `http://{HOST}/msx/start.json` должен отвечать. Тестов и линтера в репозитории нет.
 
+### Локально в Docker
+
+```bash
+cp .env.example .env        # заполнить MSX_HOST, креды Mongo, MONGODB_URL
+docker compose up --build   # поднимет app + mongo
+```
+
+Compose состоит из двух файлов: `docker-compose.yml` (используется и на сервере — только `image:` из GHCR + сервис `mongo:7` с volume `mongo-data`) и `docker-compose.override.yml` (только локально, добавляет `build: .`). На сервер копируется лишь основной файл, поэтому там сборки нет — только `pull`. Подробнее про деплой — в `DEPLOY.md`.
+
+Состояние Mongo живёт в volume `mongo-data`; `kp-sqlite.db` в docker-режиме не используется (MONGODB_URL задан → `config.IS_SQLITE=False`).
+
 ## Конфигурация (env vars, см. config.py)
 
 - `MSX_HOST` — базовый адрес сервера, подставляется во все ссылки MSX. На render.com автоматически берётся `RENDER_EXTERNAL_URL`. **Без него ссылки сломаны.**

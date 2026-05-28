@@ -194,6 +194,68 @@ def content(entries, category, page, extra=None, decompress=None, device_setting
     return resp
 
 
+def continue_watching(entries, device_settings: 'DeviceSettings' = None):
+    if not entries:
+        return {
+            "type": "pages",
+            "headline": "Продолжить просмотр",
+            "pages": [
+                {
+                    "items": [
+                        {
+                            "type": "space",
+                            "layout": "0,0,8,3",
+                            "title": SAD_LENNY,
+                            "titleFooter": "Здесь будут сериалы и фильмы, к просмотру которых можно вернуться одним нажатием."
+                        }
+                    ]
+                }
+            ]
+        }
+
+    resp = {
+        "type": "list",
+        "headline": "Продолжить просмотр",
+        "template": {
+            "type": "separate",
+            "layout": "0,0,2,4",
+            "color": "msx-glass",
+            "title": "Title"
+        },
+        "items": []
+    }
+
+    for entry in entries:
+        content = entry['content']
+        episode = entry['episode']
+        video = entry['video']
+        playable = episode if episode is not None else video
+
+        item = {
+            'title': content.title,
+            'image': content.poster.get(device_settings=device_settings),
+            'action': playable.msx_action(device_settings=device_settings),
+            'properties': playable.msx_properties(device_settings=device_settings),
+            'playerLabel': playable.player_title() if episode is not None else content.title,
+        }
+
+        if episode is not None:
+            item['titleFooter'] = f'[S{episode.season}/E{episode.n}] {episode.title or ""}'.strip()
+        else:
+            footer = ''
+            if content.rating:
+                footer += f' {{ico:stars}} {content.rating}'
+            if content.year:
+                footer += f' {{ico:calendar-month}} {content.year}'
+            if content.is_4k:
+                footer += f' {{ico:4k}}'
+            item['titleFooter'] = footer.strip()
+
+        resp['items'].append(item)
+
+    return resp
+
+
 def collections(entries, device_settings: 'DeviceSettings' = None) -> dict:
     resp = {
         "type": "list",
