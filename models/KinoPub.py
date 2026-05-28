@@ -115,7 +115,7 @@ class KinoPub:
             return None
         return [Content(i['item'], Media(i['media'])) for i in result['history']]
 
-    async def get_continue_watching(self, limit=10, history_pages=3):
+    async def get_continue_watching(self, limit=10, history_pages=2):
         seen = set()
         candidates = []
         for page in range(1, history_pages + 1):

@@ -220,7 +220,8 @@ def continue_watching(entries, device_settings: 'DeviceSettings' = None):
             "type": "separate",
             "layout": "0,0,2,4",
             "color": "msx-glass",
-            "title": "Title"
+            "title": "Title",
+            "properties": dict(DEFAULT_PLAY_BUTTON_PROPS),
         },
         "items": []
     }
@@ -235,7 +236,10 @@ def continue_watching(entries, device_settings: 'DeviceSettings' = None):
             'title': content.title,
             'image': content.poster.get(device_settings=device_settings),
             'action': playable.msx_action(device_settings=device_settings),
-            'properties': playable.msx_properties(device_settings=device_settings),
+            'properties': {
+                'resume:key': playable.resume_key(),
+                'trigger:ready': playable.trigger_ready(),
+            },
             'playerLabel': playable.player_title() if episode is not None else content.title,
         }
 

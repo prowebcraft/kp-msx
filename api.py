@@ -255,7 +255,7 @@ async def history(request: Request):
 @app.get(ENDPOINT + '/continue')
 async def continue_watching(request: Request):
     device = request.state.device
-    items = await device.kp.get_continue_watching(limit=10)
+    items = await device.kp.get_continue_watching(limit=12, history_pages=3)
     return msx.continue_watching(items, device_settings=device.settings)
 
 
