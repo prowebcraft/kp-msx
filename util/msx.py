@@ -221,7 +221,12 @@ def continue_watching(entries, device_settings: 'DeviceSettings' = None):
             "layout": "0,0,2,4",
             "color": "msx-glass",
             "title": "Title",
-            "properties": dict(DEFAULT_PLAY_BUTTON_PROPS),
+            "properties": {
+                **DEFAULT_PLAY_BUTTON_PROPS,
+                "button:content:enable": "false",
+                "button:next:enable": "false",
+                "button:back:enable": "false",
+            },
         },
         "items": []
     }
@@ -230,22 +235,26 @@ def continue_watching(entries, device_settings: 'DeviceSettings' = None):
         content = entry['content']
         episode = entry['episode']
         video = entry['video']
-        playable = episode if episode is not None else video
 
         item = {
             'title': content.title,
             'image': content.poster.get(device_settings=device_settings),
-            'action': playable.msx_action(device_settings=device_settings),
-            'properties': {
-                'resume:key': playable.resume_key(),
-                'trigger:ready': playable.trigger_ready(),
-            },
-            'playerLabel': playable.player_title() if episode is not None else content.title,
         }
 
         if episode is not None:
+            item['action'] = format_action(
+                '/msx/episodes',
+                params={'content_id': content.id, 'season': episode.season},
+                module='panel',
+            )
             item['titleFooter'] = f'[S{episode.season}/E{episode.n}] {episode.title or ""}'.strip()
         else:
+            item['action'] = video.msx_action(device_settings=device_settings)
+            item['properties'] = {
+                'resume:key': video.resume_key(),
+                'trigger:ready': video.trigger_ready(),
+            }
+            item['playerLabel'] = content.title
             footer = ''
             if content.rating:
                 footer += f' {{ico:stars}} {content.rating}'
